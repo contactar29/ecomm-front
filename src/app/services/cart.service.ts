@@ -230,23 +230,26 @@ export class CartService {
             userId: userId,
             products: this.cartDataClient.prodData}
           ).subscribe((data:OrderResponse) =>{
-            this.orderService.getSingleOrder(data.order_id).then(prods => {
               if(data.success){
-                const navigationExtras: NavigationExtras = {
-                  state: {
-                    message: data.message,
-                    products: prods,
-                    orderId: data.order_id,
-                    total: this.cartDataClient.total
-                  }
-                };
-                //TODO HIDE SPINNER
-                this.spinner.hide().then();
-                this.router.navigate(['\thankyou'], navigationExtras).then(p => {
-                  this.cartDataClient = {total: 0, prodData:[{inCart: 0, id:0}]};
-                  this.cartTotal$.next(0);
-                  localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
-                });
+                setTimeout(() => {
+                  this.orderService.getSingleOrder(data.order_id).then(prods => {
+                    const navigationExtras: NavigationExtras = {
+                      state: {
+                        message: data.message,
+                        products: prods,
+                        orderId: data.order_id,
+                        total: this.cartDataClient.total
+                      }
+                    };
+                    //TODO HIDE SPINNER
+                    this.spinner.hide().then();
+                    this.router.navigate(['/thankyou'], navigationExtras).then(p => {
+                      this.cartDataClient = {total: 0, prodData:[{inCart: 0, id:0}]};
+                      this.cartTotal$.next(0);
+                      localStorage.setItem('cart', JSON.stringify(this.cartDataClient));
+                    });
+                  });
+                },1000);
               }else{
                 this.spinner.hide().then();
                 this.router.navigateByUrl('/checkout').then();
@@ -257,7 +260,6 @@ export class CartService {
                   positionClass: 'toast-top-right'
                 });
               }
-            });
           });
         }
       });
